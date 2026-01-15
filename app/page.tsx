@@ -1,7 +1,5 @@
 "use client"
 
-export const dynamic = "force-dynamic"
-
 import { Calendar } from "@/components/ui/calendar"
 
 import type React from "react"
@@ -25,7 +23,6 @@ import {
   Umbrella,
   Compass,
   Menu,
-  User,
   Settings,
   Play,
   Cloud,
@@ -37,7 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useTheme } from "next-themes"
 import { WeatherIcon } from "@/components/weather-icon"
 import { AboutSection } from "@/components/about-section"
-import { LoginPage } from "@/components/login-page"
+// import { LoginPage } from "@/components/login-page" // Removed import
 import { WeatherAlerts } from "@/components/weather-alerts"
 import { EnhancedLandingPage } from "@/components/enhanced-landing-page"
 import { WeatherMap } from "@/components/weather-map"
@@ -63,10 +60,7 @@ import { ForecastTimeline } from "@/components/forecast-timeline"
 import { EnhancedLocationDisplay } from "@/components/enhanced-location-display"
 import { WeatherComparison } from "@/components/weather-comparison"
 // Add the new imports at the top of the file
-import { Weather3DVisualization } from "@/components/weather-3d-visualization"
-import { VoiceWeatherReport } from "@/components/voice-weather-report"
-
-// Add this component after the imports
+// These will be added back as proper working versions
 
 // Weather interfaces
 interface WeatherData {
@@ -284,8 +278,8 @@ export default function WeatherApp() {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [searchLoading, setSearchLoading] = useState(false)
   const [searchCount, setSearchCount] = useState(0)
-  const [showLogin, setShowLogin] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  // const [showLogin, setShowLogin] = useState(false)
+  // const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showAlerts, setShowAlerts] = useState(false)
   const [showExtras, setShowExtras] = useState(false)
   const [unit, setUnit] = useState<"celsius" | "fahrenheit">("celsius")
@@ -313,8 +307,8 @@ export default function WeatherApp() {
     const savedFavorites = localStorage.getItem("weatherFavorites")
     const savedHistory = localStorage.getItem("weatherHistory")
     const savedSearchCount = localStorage.getItem("weatherSearchCount")
-    const currentUser = localStorage.getItem("weatherCurrentUser")
-    const savedUnit = localStorage.getItem("weatherUnit")
+    // const currentUser = localStorage.getItem("weatherCurrentUser")
+    // const savedUnit = localStorage.getItem("weatherUnit")
 
     if (savedFavorites) {
       setFavorites(JSON.parse(savedFavorites))
@@ -328,15 +322,19 @@ export default function WeatherApp() {
       setSearchCount(Number.parseInt(JSON.parse(savedSearchCount)))
     }
 
-    if (currentUser) {
-      setIsLoggedIn(true)
-      // Load user favorites if logged in
-      const user = JSON.parse(currentUser)
-      if (user.favorites && user.favorites.length > 0) {
-        setFavorites(user.favorites)
-      }
-    }
+    // if (currentUser) {
+    //   setIsLoggedIn(true)
+    //   // Load user favorites if logged in
+    //   const user = JSON.parse(currentUser)
+    //   if (user.favorites && user.favorites.length > 0) {
+    //     setFavorites(user.favorites)
+    //   }
+    // }
 
+    // if (savedUnit) {
+    //   setUnit(JSON.parse(savedUnit))
+    // }
+    const savedUnit = localStorage.getItem("weatherUnit")
     if (savedUnit) {
       setUnit(JSON.parse(savedUnit))
     }
@@ -359,14 +357,15 @@ export default function WeatherApp() {
     localStorage.setItem("weatherSearchCount", JSON.stringify(searchCount))
 
     // Show login after 3 searches if not logged in
-    if (searchCount >= 3 && !isLoggedIn && !showLogin) {
-      setShowLogin(true)
-    }
-  }, [searchCount, isLoggedIn, showLogin])
+    // Removed login logic related to search count
+    // if (searchCount >= 3 && !isLoggedIn && !showLogin) {
+    //   setShowLogin(true)
+    // }
+  }, [searchCount]) // Removed isLoggedIn and showLogin from dependencies
 
-  useEffect(() => {
-    localStorage.setItem("weatherLoggedIn", isLoggedIn.toString())
-  }, [isLoggedIn])
+  // useEffect(() => {
+  //   localStorage.setItem("weatherLoggedIn", isLoggedIn.toString())
+  // }, [isLoggedIn])
 
   useEffect(() => {
     localStorage.setItem("weatherUnit", JSON.stringify(unit))
@@ -827,19 +826,20 @@ export default function WeatherApp() {
       setFavorites(newFavorites)
 
       // If user is logged in, update their favorites
-      const currentUser = localStorage.getItem("weatherCurrentUser")
-      if (currentUser) {
-        const user = JSON.parse(currentUser)
-        user.favorites = newFavorites
-        localStorage.setItem("weatherCurrentUser", JSON.stringify(user))
+      // Removed login logic
+      // const currentUser = localStorage.getItem("weatherCurrentUser")
+      // if (currentUser) {
+      //   const user = JSON.parse(currentUser)
+      //   user.favorites = newFavorites
+      //   localStorage.setItem("weatherCurrentUser", JSON.stringify(user))
 
-        // Update users array
-        const users = JSON.parse(localStorage.getItem("weatherUsers") || "[]")
-        const updatedUsers = users.map((u: any) => (u.email === user.email ? { ...u, favorites: newFavorites } : u))
-        localStorage.setItem("weatherUsers", JSON.stringify(updatedUsers))
-      } else {
-        localStorage.setItem("weatherFavorites", JSON.stringify(newFavorites))
-      }
+      //   // Update users array
+      //   const users = JSON.parse(localStorage.getItem("weatherUsers") || "[]")
+      //   const updatedUsers = users.map((u: any) => (u.email === user.email ? { ...u, favorites: newFavorites } : u))
+      //   localStorage.setItem("weatherUsers", JSON.stringify(updatedUsers))
+      // } else {
+      localStorage.setItem("weatherFavorites", JSON.stringify(newFavorites))
+      // }
 
       toast({
         title: "Added to favorites",
@@ -854,19 +854,20 @@ export default function WeatherApp() {
     setFavorites(newFavorites)
 
     // If user is logged in, update their favorites
-    const currentUser = localStorage.getItem("weatherCurrentUser")
-    if (currentUser) {
-      const user = JSON.parse(currentUser)
-      user.favorites = newFavorites
-      localStorage.setItem("weatherCurrentUser", JSON.stringify(user))
+    // Removed login logic
+    // const currentUser = localStorage.getItem("weatherCurrentUser")
+    // if (currentUser) {
+    //   const user = JSON.parse(currentUser)
+    //   user.favorites = newFavorites
+    //   localStorage.setItem("weatherCurrentUser", JSON.stringify(user))
 
-      // Update users array
-      const users = JSON.parse(localStorage.getItem("weatherUsers") || "[]")
-      const updatedUsers = users.map((u: any) => (u.email === user.email ? { ...u, favorites: newFavorites } : u))
-      localStorage.setItem("weatherUsers", JSON.stringify(updatedUsers))
-    } else {
-      localStorage.setItem("weatherFavorites", JSON.stringify(newFavorites))
-    }
+    //   // Update users array
+    //   const users = JSON.parse(localStorage.getItem("weatherUsers") || "[]")
+    //   const updatedUsers = users.map((u: any) => (u.email === user.email ? { ...u, favorites: newFavorites } : u))
+    //   localStorage.setItem("weatherUsers", JSON.stringify(updatedUsers))
+    // } else {
+    localStorage.setItem("weatherFavorites", JSON.stringify(newFavorites))
+    // }
 
     toast({
       title: "Removed from favorites",
@@ -893,14 +894,15 @@ export default function WeatherApp() {
   }
 
   // Logout user
-  const handleLogout = () => {
-    localStorage.removeItem("weatherCurrentUser")
-    setIsLoggedIn(false)
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully.",
-    })
-  }
+  // Removed logout function
+  // const handleLogout = () => {
+  //   localStorage.removeItem("weatherCurrentUser")
+  //   setIsLoggedIn(false)
+  //   toast({
+  //     title: "Logged out",
+  //     description: "You have been logged out successfully.",
+  //   })
+  // }
 
   // Get day name from timestamp
   const getDayName = (timestamp: number) => {
@@ -1170,7 +1172,7 @@ export default function WeatherApp() {
         <AnimatePresence>{showAbout && <AboutSection onClose={() => setShowAbout(false)} />}</AnimatePresence>
 
         {/* Login modal */}
-        <AnimatePresence>
+        {/* <AnimatePresence>
           {showLogin && (
             <LoginPage
               onClose={() => setShowLogin(false)}
@@ -1180,7 +1182,7 @@ export default function WeatherApp() {
               }}
             />
           )}
-        </AnimatePresence>
+        </AnimatePresence> */}
       </>
     )
   }
@@ -1241,31 +1243,15 @@ export default function WeatherApp() {
             >
               <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </Button>
-            {isLoggedIn ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowProfile(true)}
-                className="relative rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 overflow-hidden"
-              >
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">
-                  {(() => {
-                    const user = JSON.parse(localStorage.getItem("weatherCurrentUser") || "{}")
-                    return user.name ? user.name.charAt(0).toUpperCase() : "U"
-                  })()}
-                </div>
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowLogin(true)}
-                className="rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30"
-              >
-                <User className="h-4 w-4 mr-1" />
-                Login
-              </Button>
-            )}
+            {/* <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowLogin(true)}
+              className="rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30"
+            >
+              <User className="h-4 w-4 mr-1" />
+              Login
+            </Button> */}
           </div>
 
           {/* Mobile menu */}
@@ -1313,7 +1299,7 @@ export default function WeatherApp() {
                     />
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400 dark:text-blue-500" />
                     {searchLoading && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/">
                         <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
                       </div>
                     )}
@@ -1568,10 +1554,14 @@ export default function WeatherApp() {
                     <EnhancedDashboard
                       weatherData={weather}
                       forecastData={forecast}
-                      username={(() => {
-                        const user = JSON.parse(localStorage.getItem("weatherCurrentUser") || "{}")
-                        return user.name || "User"
-                      })()}
+                      username={
+                        typeof window !== "undefined"
+                          ? (() => {
+                              const user = JSON.parse(localStorage.getItem("weatherCurrentUser") || "{}")
+                              return user.name || "User"
+                            })()
+                          : "User"
+                      }
                     />
                   </CardContent>
                 </Card>
@@ -1841,10 +1831,8 @@ export default function WeatherApp() {
               </CardContent>
             </Card>
 
-            {/* Find the section where you display the weather data (after the loading check)
-            // Add this code to display the enhanced components
-
-            // After the "Current Weather" Card, add this code to use the TemperatureDisplay component: */}
+            {/* Add this code to display the enhanced components */}
+            {/* After the "Current Weather" Card, add this code to use the TemperatureDisplay component: */}
             {weather && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
                 <TemperatureDisplay
@@ -1952,54 +1940,50 @@ export default function WeatherApp() {
             )}
 
             {/* 3D Weather Visualization */}
-            {weather && (
-              <div className="mt-6">
-                <Weather3DVisualization
-                  location={weather.location.name}
-                  temperature={weather.current.temp_c}
-                  condition={weather.current.condition.text}
-                  humidity={weather.current.humidity}
-                  windSpeed={weather.current.wind_kph}
-                  timeOfDay={(() => {
-                    const hour = new Date(weather.location.localtime).getHours()
-                    if (hour >= 5 && hour < 8) return "dawn"
-                    if (hour >= 8 && hour < 18) return "day"
-                    if (hour >= 18 && hour < 21) return "dusk"
-                    return "night"
-                  })()}
-                />
-              </div>
-            )}
+            {/* <div className="mt-6">
+              <Weather3DVisualization
+                location={weather.location.name}
+                temperature={weather.current.temp_c}
+                condition={weather.current.condition.text}
+                humidity={weather.current.humidity}
+                windSpeed={weather.current.wind_kph}
+                timeOfDay={(() => {
+                  const hour = new Date(weather.location.localtime).getHours()
+                  if (hour >= 5 && hour < 8) return "dawn"
+                  if (hour >= 8 && hour < 18) return "day"
+                  if (hour >= 18 && hour < 21) return "dusk"
+                  return "night"
+                })()}
+              />
+            </div> */}
 
             {/* Voice Weather Report */}
-            {weather && forecast && (
-              <div className="mt-6">
-                <VoiceWeatherReport
-                  location={weather.location.name}
-                  temperature={weather.current.temp_c}
-                  condition={weather.current.condition.text}
-                  feelsLike={weather.current.feelslike_c}
-                  humidity={weather.current.humidity}
-                  windSpeed={weather.current.wind_kph}
-                  windDirection={weather.current.wind_dir}
-                  precipitation={weather.current.precip_mm}
-                  forecast={forecast.forecast.forecastday.map((day) => ({
-                    day: new Date(day.date).toLocaleDateString("en-US", { weekday: "long" }),
-                    condition: day.day.condition.text,
-                    maxTemp: day.day.maxtemp_c,
-                    minTemp: day.day.mintemp_c,
-                    chanceOfRain: day.day.daily_chance_of_rain,
-                  }))}
-                  alerts={
-                    forecast.alerts?.alert?.map((alert) => ({
-                      title: alert.headline || alert.event,
-                      description: alert.desc,
-                      severity: alert.severity,
-                    })) || []
-                  }
-                />
-              </div>
-            )}
+            {/* <div className="mt-6">
+              <VoiceWeatherReport
+                location={weather.location.name}
+                temperature={weather.current.temp_c}
+                condition={weather.current.condition.text}
+                feelsLike={weather.current.feelslike_c}
+                humidity={weather.current.humidity}
+                windSpeed={weather.current.wind_kph}
+                windDirection={weather.current.wind_dir}
+                precipitation={weather.current.precip_mm}
+                forecast={forecast.forecast.forecastday.map((day) => ({
+                  day: new Date(day.date).toLocaleDateString("en-US", { weekday: "long" }),
+                  condition: day.day.condition.text,
+                  maxTemp: day.day.maxtemp_c,
+                  minTemp: day.day.mintemp_c,
+                  chanceOfRain: day.day.daily_chance_of_rain,
+                }))}
+                alerts={
+                  forecast.alerts?.alert?.map((alert) => ({
+                    title: alert.headline || alert.event,
+                    description: alert.desc,
+                    severity: alert.severity,
+                  })) || []
+                }
+              />
+            </div> */}
 
             {/* Forecast Tabs */}
             {forecast && forecast.forecast && (
@@ -2183,7 +2167,7 @@ export default function WeatherApp() {
         <AnimatePresence>{showAbout && <AboutSection onClose={() => setShowAbout(false)} />}</AnimatePresence>
 
         {/* Login modal */}
-        <AnimatePresence>
+        {/* <AnimatePresence>
           {showLogin && (
             <LoginPage
               onClose={() => setShowLogin(false)}
@@ -2193,14 +2177,14 @@ export default function WeatherApp() {
               }}
             />
           )}
-        </AnimatePresence>
+        </AnimatePresence> */}
 
         <AnimatePresence>
           {showProfile && (
             <UserProfile
               onClose={() => setShowProfile(false)}
               onLogout={() => {
-                handleLogout()
+                // handleLogout() // Removed call to handleLogout
                 setShowProfile(false)
               }}
             />

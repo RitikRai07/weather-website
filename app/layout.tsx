@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://yourdomain.com",
   },
-    generator: 'v0.app'
+  generator: "v0.app",
 }
 
 export default function RootLayout({
@@ -57,6 +57,11 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-icon.png" />
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#1e293b" media="(prefers-color-scheme: dark)" />
+        <script
+          async
+          data-cfasync="false"
+          src="https://pl28487680.effectivegatecpm.com/cf50a5d1fbce9f6fbd13308d425d2c79/invoke.js"
+        ></script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -78,6 +83,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}
         </ThemeProvider>
+        <div id="container-cf50a5d1fbce9f6fbd13308d425d2c79"></div>
       </body>
     </html>
   )
