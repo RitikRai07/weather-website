@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = "force-dynamic"
+
 import { Calendar } from "@/components/ui/calendar"
 
 import type React from "react"
@@ -1215,7 +1217,7 @@ export default function WeatherApp() {
               variant="outline"
               size="sm"
               onClick={toggleUnit}
-              className="rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30"
+              className="rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 bg-transparent"
             >
               <span className="text-xs font-bold">{unit === "celsius" ? "°F" : "°C"}</span>
             </Button>
