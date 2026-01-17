@@ -59,6 +59,8 @@ import { TemperatureDisplay } from "@/components/temperature-display"
 import { ForecastTimeline } from "@/components/forecast-timeline"
 import { EnhancedLocationDisplay } from "@/components/enhanced-location-display"
 import { WeatherComparison } from "@/components/weather-comparison"
+import { LocationPermission } from "@/components/location-permission"
+import { EnhancedClockDisplay } from "@/components/enhanced-clock-display"
 // Add the new imports at the top of the file
 // These will be added back as proper working versions
 
@@ -72,6 +74,7 @@ interface WeatherData {
     localtime_epoch: number
     lat: number
     lon: number
+    tz_id?: string // Added for EnhancedLocationDisplay
   }
   current: {
     temp_c: number
@@ -258,9 +261,19 @@ const mockAlerts = [
   },
 ]
 
+// State for saved locations in comparison
+interface SavedLocation {
+  id: string
+  name: string
+  country: string
+  temp: number
+  condition: string
+  iconUrl?: string // Added for potential future use
+}
+
 export default function WeatherApp() {
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null)
-  const [weatherDataNew, setWeatherDataNew] = useState(null)
+  const [weatherDataNew, setWeatherDataNew] = useState<WeatherData | null>(null) // Adjusted type
   const [newsItems, setNewsItems] = useState([])
   const [city, setCity] = useState("")
   const [weather, setWeather] = useState<WeatherData | null>(null)
@@ -294,7 +307,10 @@ export default function WeatherApp() {
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null)
   // Add a new state for weather comparison
   const [showComparison, setShowComparison] = useState(false)
-  const [comparisonLocations, setComparisonLocations] = useState<any[]>([])
+  const [comparisonLocations, setComparisonLocations] = useState<SavedLocation[]>([]) // Use SavedLocation type
+  const [savedLocations, setSavedLocations] = useState<SavedLocation[]>([]) // State for saved locations
+  const [newsData, setNewsData] = useState([]) // State for fetched news data
+  const [searchQuery, setSearchQuery] = useState<string>("") // State for the search query
 
   const searchRef = useRef<HTMLDivElement>(null)
 
@@ -307,8 +323,8 @@ export default function WeatherApp() {
     const savedFavorites = localStorage.getItem("weatherFavorites")
     const savedHistory = localStorage.getItem("weatherHistory")
     const savedSearchCount = localStorage.getItem("weatherSearchCount")
-    // const currentUser = localStorage.getItem("weatherCurrentUser")
-    // const savedUnit = localStorage.getItem("weatherUnit")
+    const savedUnit = localStorage.getItem("weatherUnit")
+    const savedLocations = localStorage.getItem("weatherSavedLocations") // Load saved locations
 
     if (savedFavorites) {
       setFavorites(JSON.parse(savedFavorites))
@@ -322,21 +338,12 @@ export default function WeatherApp() {
       setSearchCount(Number.parseInt(JSON.parse(savedSearchCount)))
     }
 
-    // if (currentUser) {
-    //   setIsLoggedIn(true)
-    //   // Load user favorites if logged in
-    //   const user = JSON.parse(currentUser)
-    //   if (user.favorites && user.favorites.length > 0) {
-    //     setFavorites(user.favorites)
-    //   }
-    // }
-
-    // if (savedUnit) {
-    //   setUnit(JSON.parse(savedUnit))
-    // }
-    const savedUnit = localStorage.getItem("weatherUnit")
     if (savedUnit) {
       setUnit(JSON.parse(savedUnit))
+    }
+
+    if (savedLocations) {
+      setSavedLocations(JSON.parse(savedLocations)) // Parse and set saved locations
     }
 
     // Use IP-based location instead of geolocation
@@ -355,21 +362,15 @@ export default function WeatherApp() {
 
   useEffect(() => {
     localStorage.setItem("weatherSearchCount", JSON.stringify(searchCount))
-
-    // Show login after 3 searches if not logged in
-    // Removed login logic related to search count
-    // if (searchCount >= 3 && !isLoggedIn && !showLogin) {
-    //   setShowLogin(true)
-    // }
-  }, [searchCount]) // Removed isLoggedIn and showLogin from dependencies
-
-  // useEffect(() => {
-  //   localStorage.setItem("weatherLoggedIn", isLoggedIn.toString())
-  // }, [isLoggedIn])
+  }, [searchCount])
 
   useEffect(() => {
     localStorage.setItem("weatherUnit", JSON.stringify(unit))
   }, [unit])
+
+  useEffect(() => {
+    localStorage.setItem("weatherSavedLocations", JSON.stringify(savedLocations)) // Save locations
+  }, [savedLocations])
 
   // Fetch search suggestions when city input changes
   useEffect(() => {
@@ -722,71 +723,53 @@ export default function WeatherApp() {
     }
   }
 
-  // Mock function to fetch weather data
   const fetchWeatherDataNew = async (lat: number, lon: number) => {
-    // In a real app, this would fetch from a weather API
-    console.log(`Fetching weather data for lat: ${lat}, lon: ${lon}`)
-
-    // Simulate API call
-    setTimeout(() => {
-      setWeatherDataNew({
-        // Mock weather data
-        temperature: 72,
-        condition: "Sunny",
-        humidity: 45,
-        windSpeed: 8,
-        // Add more weather data as needed
+    try {
+      const apiKey = "68ae5ecd826a46278fd60435252403"
+      const response = await fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}&aqi=yes`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
       })
-    }, 1000)
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch weather data")
+      }
+
+      const data: WeatherData = await response.json()
+      setWeatherDataNew(data)
+    } catch (err) {
+      console.error("Error fetching weather data:", err)
+      toast({
+        title: "Error",
+        description: "Failed to fetch weather data. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
-  // Mock function to fetch news data
   const fetchNewsData = async () => {
-    // In a real app, this would fetch from a news API
-    console.log("Fetching news data")
+    try {
+      const response = await fetch(
+        "https://api.weatherapi.com/v1/alerts.json?key=68ae5ecd826a46278fd60435252403&q=auto:ip",
+      )
 
-    // Simulate API call with mock data
-    setTimeout(() => {
-      const mockNews = [
-        {
-          id: 1,
-          title: "Severe Weather Warning for Coastal Areas",
-          content: "Meteorologists predict heavy rainfall and strong winds...",
-          categories: ["Alerts", "Severe Weather"],
-          date: new Date().toISOString(),
-        },
-        {
-          id: 2,
-          title: "Climate Change Impact on Regional Weather Patterns",
-          content: "New study reveals significant changes in seasonal patterns...",
-          categories: ["Climate", "Research"],
-          date: new Date().toISOString(),
-        },
-        {
-          id: 3,
-          title: "Hurricane Season Forecast Update",
-          content: "NOAA updates hurricane season forecast with increased activity...",
-          categories: ["Hurricanes", "Forecasts"],
-          date: new Date().toISOString(),
-        },
-        {
-          id: 4,
-          title: "New Weather Satellite Launched",
-          content: "NASA successfully launches next-generation weather satellite...",
-          categories: ["Technology", "Space"],
-          date: new Date().toISOString(),
-        },
-        {
-          id: 5,
-          title: "Record-Breaking Temperatures Expected This Summer",
-          content: "Meteorologists predict hottest summer on record...",
-          categories: ["Climate", "Forecasts"],
-          date: new Date().toISOString(),
-        },
-      ]
+      if (!response.ok) {
+        throw new Error("Failed to fetch alerts")
+      }
 
-      setNewsItems(mockNews)
-    }, 1500)
+      const data = await response.json()
+      setNewsData(data.alerts?.alerts || [])
+    } catch (err) {
+      console.error("Error fetching news data:", err)
+      toast({
+        title: "Error",
+        description: "Failed to fetch news. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   useEffect(() => {
@@ -795,7 +778,7 @@ export default function WeatherApp() {
     }
 
     fetchNewsData()
-  }, [location])
+  }, [location]) // Re-fetch news when location changes
 
   const handleLocationSelected = (coords: { lat: number; lon: number }) => {
     setLocation(coords)
@@ -803,6 +786,35 @@ export default function WeatherApp() {
 
   const handleNotificationPermissionChange = (permission: NotificationPermission) => {
     setNotificationPermission(permission)
+  }
+
+  // Handler for granted location
+  const handleLocationGranted = (coords: { lat: number; lon: number }) => {
+    // Fetch weather for the granted location
+    setSearchQuery(`${coords.lat},${coords.lon}`)
+    // Trigger weather fetch by setting the city based on coordinates
+    const fetchCityFromCoords = async () => {
+      try {
+        const apiKey = "68ae5ecd826a46278fd60435252403"
+        const response = await fetch(
+          `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${coords.lat},${coords.lon}&aqi=yes`,
+        )
+        if (!response.ok) {
+          throw new Error("Failed to get city name from coordinates")
+        }
+        const data = await response.json()
+        setCity(data.location.name)
+        fetchWeather(data.location.name)
+      } catch (error) {
+        console.error("Error fetching city from coordinates:", error)
+        toast({
+          title: "Error",
+          description: "Could not determine city name from your location.",
+          variant: "destructive",
+        })
+      }
+    }
+    fetchCityFromCoords()
   }
 
   // Handle form submission
@@ -824,22 +836,7 @@ export default function WeatherApp() {
     if (!favorites.includes(cityName)) {
       const newFavorites = [...favorites, cityName]
       setFavorites(newFavorites)
-
-      // If user is logged in, update their favorites
-      // Removed login logic
-      // const currentUser = localStorage.getItem("weatherCurrentUser")
-      // if (currentUser) {
-      //   const user = JSON.parse(currentUser)
-      //   user.favorites = newFavorites
-      //   localStorage.setItem("weatherCurrentUser", JSON.stringify(user))
-
-      //   // Update users array
-      //   const users = JSON.parse(localStorage.getItem("weatherUsers") || "[]")
-      //   const updatedUsers = users.map((u: any) => (u.email === user.email ? { ...u, favorites: newFavorites } : u))
-      //   localStorage.setItem("weatherUsers", JSON.stringify(updatedUsers))
-      // } else {
       localStorage.setItem("weatherFavorites", JSON.stringify(newFavorites))
-      // }
 
       toast({
         title: "Added to favorites",
@@ -852,22 +849,7 @@ export default function WeatherApp() {
   const removeFromFavorites = (cityName: string) => {
     const newFavorites = favorites.filter((fav) => fav !== cityName)
     setFavorites(newFavorites)
-
-    // If user is logged in, update their favorites
-    // Removed login logic
-    // const currentUser = localStorage.getItem("weatherCurrentUser")
-    // if (currentUser) {
-    //   const user = JSON.parse(currentUser)
-    //   user.favorites = newFavorites
-    //   localStorage.setItem("weatherCurrentUser", JSON.stringify(user))
-
-    //   // Update users array
-    //   const users = JSON.parse(localStorage.getItem("weatherUsers") || "[]")
-    //   const updatedUsers = users.map((u: any) => (u.email === user.email ? { ...u, favorites: newFavorites } : u))
-    //   localStorage.setItem("weatherUsers", JSON.stringify(updatedUsers))
-    // } else {
     localStorage.setItem("weatherFavorites", JSON.stringify(newFavorites))
-    // }
 
     toast({
       title: "Removed from favorites",
@@ -892,17 +874,6 @@ export default function WeatherApp() {
       description: `Switched to ${unit === "celsius" ? "Fahrenheit" : "Celsius"}`,
     })
   }
-
-  // Logout user
-  // Removed logout function
-  // const handleLogout = () => {
-  //   localStorage.removeItem("weatherCurrentUser")
-  //   setIsLoggedIn(false)
-  //   toast({
-  //     title: "Logged out",
-  //     description: "You have been logged out successfully.",
-  //   })
-  // }
 
   // Get day name from timestamp
   const getDayName = (timestamp: number) => {
@@ -1051,51 +1022,99 @@ export default function WeatherApp() {
     setShowVideoModal(true)
   }
 
-  // Add a function to handle adding locations to comparison
-  const addLocationToComparison = async (query: string) => {
-    if (!query.trim()) return
-
+  const addLocation = async (query: string) => {
     try {
-      // In a real app, you would fetch weather data for this location
-      // For now, we'll create mock data
-      const mockLocation = {
-        id: `loc-${Date.now()}`,
-        name: query,
-        country: "Sample Country",
-        temp: Math.floor(Math.random() * 30) + 5,
-        feelsLike: Math.floor(Math.random() * 30) + 5,
-        humidity: Math.floor(Math.random() * 100),
-        windSpeed: Math.floor(Math.random() * 30),
-        uvIndex: Math.floor(Math.random() * 10),
-        precipitation: Math.floor(Math.random() * 100),
-        condition: "Partly cloudy",
-        iconUrl: "https://cdn.weatherapi.com/weather/64x64/day/116.png",
+      const apiKey = "68ae5ecd826a46278fd60435252403"
+      const response = await fetch(`https://api.weatherapi.com/v1/search.json?key=${apiKey}&q=${query}`)
+
+      if (!response.ok) {
+        throw new Error("Failed to search locations")
       }
 
-      setComparisonLocations((prev) => [...prev, mockLocation])
-    } catch (error) {
-      console.error("Error adding location to comparison:", error)
+      const searchResults = await response.json()
+
+      if (searchResults.length === 0) {
+        toast({
+          title: "Not Found",
+          description: "Location not found. Please try another search.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Fetch weather for the first result
+      const location = searchResults[0]
+      const weatherResponse = await fetch(
+        `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${location.lat},${location.lon}&aqi=yes`,
+      )
+
+      if (!weatherResponse.ok) {
+        throw new Error("Failed to fetch weather")
+      }
+
+      const weatherData: WeatherData = await weatherResponse.json()
+
+      const newLocation: SavedLocation = {
+        // Use SavedLocation type
+        id: `${location.lat}-${location.lon}`,
+        name: `${location.name}, ${location.country}`,
+        country: location.country,
+        temp: Math.round(weatherData.current.temp_c),
+        condition: weatherData.current.condition.text,
+        iconUrl: weatherData.current.condition.icon, // Store icon URL
+      }
+
+      setSavedLocations((prev) => [...prev, newLocation])
+      toast({
+        title: "Added",
+        description: `${newLocation.name} has been added to your saved locations.`,
+      })
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to add location",
+        variant: "destructive",
+      })
     }
   }
 
   // Add a function to remove locations from comparison
   const removeLocationFromComparison = (id: string) => {
-    setComparisonLocations((prev) => prev.filter((loc) => loc.id !== id))
+    setSavedLocations((prev) => prev.filter((loc) => loc.id !== id))
   }
 
   // Add a function to refresh comparison data
   const refreshComparisonData = async () => {
-    // In a real app, you would re-fetch data for all locations
-    // For now, we'll just update the temperatures randomly
-    setComparisonLocations((prev) =>
-      prev.map((loc) => ({
-        ...loc,
-        temp: Math.floor(Math.random() * 30) + 5,
-        feelsLike: Math.floor(Math.random() * 30) + 5,
-        humidity: Math.floor(Math.random() * 100),
-        windSpeed: Math.floor(Math.random() * 30),
-      })),
+    const refreshedLocations = await Promise.all(
+      savedLocations.map(async (loc) => {
+        try {
+          const [lat, lon] = loc.id.split("-").map(Number) // Extract lat/lon from id
+          const apiKey = "68ae5ecd826a46278fd60435252403"
+          const response = await fetch(
+            `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}&aqi=yes`,
+            {
+              cache: "no-store",
+              headers: {
+                "Cache-Control": "no-cache",
+                Pragma: "no-cache",
+              },
+            },
+          )
+          if (!response.ok) throw new Error("Failed to fetch data")
+          const data: WeatherData = await response.json()
+          return {
+            ...loc,
+            temp: Math.round(data.current.temp_c),
+            condition: data.current.condition.text,
+            iconUrl: data.current.condition.icon,
+          }
+        } catch (error) {
+          console.error(`Error refreshing data for ${loc.name}:`, error)
+          return loc // Return original location if refresh fails
+        }
+      }),
     )
+    setSavedLocations(refreshedLocations)
   }
 
   // If we're still loading the initial location, show a loading screen
@@ -1128,6 +1147,8 @@ export default function WeatherApp() {
   if (!weather) {
     return (
       <>
+        <LocationPermission onLocationGranted={handleLocationGranted} />
+
         <EnhancedLandingPage
           onSearch={(cityName) => fetchWeather(cityName)}
           onUseLocation={() => getUserLocation()}
@@ -1201,7 +1222,7 @@ export default function WeatherApp() {
               Weather Forecast
             </h1>
             <div className="hidden md:block transform hover:scale-105 transition-transform">
-              <RealTimeClock />
+              <EnhancedClockDisplay showSeconds={true} />
             </div>
           </motion.div>
 
@@ -1277,7 +1298,6 @@ export default function WeatherApp() {
             </Button>
           </div>
         </header>
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1514,7 +1534,6 @@ export default function WeatherApp() {
             </CardContent>
           </Card>
         </motion.div>
-
         {/* Loading state */}
         {loading && (
           <motion.div
@@ -1532,7 +1551,6 @@ export default function WeatherApp() {
             </div>
           </motion.div>
         )}
-
         {/* Weather data */}
         {!loading && weather && (
           <motion.div
@@ -1573,7 +1591,7 @@ export default function WeatherApp() {
               <div className="mb-4 flex justify-center">
                 <WeatherAlerts
                   location={weather.location.name}
-                  alerts={mockAlerts} // Using mock alerts for demonstration
+                  alerts={forecast.alerts.alert} // Use actual alerts from forecast
                 />
               </div>
             )}
@@ -1867,7 +1885,7 @@ export default function WeatherApp() {
                     lat: weather.location.lat,
                     lon: weather.location.lon,
                     localtime: weather.location.localtime,
-                    timezone: weather.location.tz_id,
+                    timezone: weather.location.tz_id, // Use tz_id from weather data
                   }}
                   isFavorite={isFavorite(weather.location.name)}
                   onToggleFavorite={() =>
@@ -1931,8 +1949,8 @@ export default function WeatherApp() {
             {showComparison && (
               <div className="mt-6">
                 <WeatherComparison
-                  locations={comparisonLocations}
-                  onAddLocation={addLocationToComparison}
+                  locations={savedLocations} // Use savedLocations state
+                  onAddLocation={addLocation} // Use the new addLocation function
                   onRemoveLocation={removeLocationFromComparison}
                   onRefresh={refreshComparisonData}
                 />
@@ -2161,11 +2179,9 @@ export default function WeatherApp() {
             )}
           </motion.div>
         )}
-
         {weather && forecast && <WeatherNotification weatherData={weather} forecastData={forecast} />}
         {/* About modal */}
         <AnimatePresence>{showAbout && <AboutSection onClose={() => setShowAbout(false)} />}</AnimatePresence>
-
         {/* Login modal */}
         {/* <AnimatePresence>
           {showLogin && (
@@ -2178,7 +2194,6 @@ export default function WeatherApp() {
             />
           )}
         </AnimatePresence> */}
-
         <AnimatePresence>
           {showProfile && (
             <UserProfile
@@ -2190,10 +2205,8 @@ export default function WeatherApp() {
             />
           )}
         </AnimatePresence>
-
         {/* User Preferences Modal */}
         <UserPreferences isOpen={showUserPreferences} onClose={() => setShowUserPreferences(false)} />
-
         {/* Weather Video Modal */}
         <WeatherVideoModal
           isOpen={showVideoModal}
@@ -2201,19 +2214,16 @@ export default function WeatherApp() {
           location={weather?.location?.name || ""}
           videoId={selectedVideoId}
         />
-
         {/* Push Notification Manager */}
         <PushNotificationManager onNotificationPermissionChange={handleNotificationPermissionChange} />
-
         {/* Add the visitor counter here */}
         <div className="mt-8 flex justify-center">
           <VisitorCounter />
         </div>
         {/* Category Stats */}
-        <CategoryStats newsItems={newsItems} />
-
+        <CategoryStats newsItems={newsData} /> {/* Use fetched newsData */}
         {/* Weather News */}
-        <WeatherNews newsItems={newsItems} />
+        <WeatherNews newsItems={newsData} /> {/* Use fetched newsData */}
       </div>
     </div>
   )

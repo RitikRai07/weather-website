@@ -57,6 +57,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-icon.png" />
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#1e293b" media="(prefers-color-scheme: dark)" />
+        <script src="https://pl28502347.effectivegatecpm.com/c2/b1/05/c2b1056e2eb263a7a2be108cf90a4bcc.js"></script>
         <script
           async
           data-cfasync="false"
