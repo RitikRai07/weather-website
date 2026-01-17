@@ -1117,31 +1117,8 @@ export default function WeatherApp() {
     setSavedLocations(refreshedLocations)
   }
 
-  // If we're still loading the initial location, show a loading screen
-  if (initialLocationLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900 dark:to-indigo-950 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-8 bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-xl border-2 border-blue-200 dark:border-blue-800/50 transform transition-all">
-          <div className="relative w-28 h-28 mx-auto mb-8">
-            <div className="absolute inset-0 rounded-full border-4 border-blue-100 dark:border-blue-900/50"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-500 animate-spin"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full animate-pulse-glow-enhanced flex items-center justify-center">
-                <Cloud className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </div>
-          <h2 className="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
-            Weather App
-          </h2>
-          <p className="text-muted-foreground mb-6 text-lg">Preparing your personalized weather experience...</p>
-          <div className="w-full bg-blue-100 dark:bg-blue-900/30 h-3 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 animate-shimmer-enhanced"></div>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  // Removed the initialLocationLoading loading screen as per the update.
+  // The content will now show directly if initialLocationLoading is false.
 
   // If no weather data is loaded yet, show the landing page
   if (!weather) {
@@ -1191,19 +1168,6 @@ export default function WeatherApp() {
 
         {/* About modal */}
         <AnimatePresence>{showAbout && <AboutSection onClose={() => setShowAbout(false)} />}</AnimatePresence>
-
-        {/* Login modal */}
-        {/* <AnimatePresence>
-          {showLogin && (
-            <LoginPage
-              onClose={() => setShowLogin(false)}
-              onLogin={() => {
-                setIsLoggedIn(true)
-                setShowLogin(false)
-              }}
-            />
-          )}
-        </AnimatePresence> */}
       </>
     )
   }

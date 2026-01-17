@@ -2009,3 +2009,68 @@
 .animate-pulse-premium {
   animation: pulse-premium 2s ease-in-out infinite;
 }
+
+/* Enhanced desktop responsive sizes */
+@media (min-width: 1024px) {
+  /* Increase main container width and padding */
+  .main-container {
+    max-width: 100%;
+    padding: 2rem 4rem;
+  }
+
+  /* Larger weather card for desktop */
+  .weather-card-main {
+    padding: 3rem;
+    border-radius: 2rem;
+  }
+
+  /* Enhanced clock display sizing */
+  .digital-clock {
+    font-size: 5rem;
+    line-height: 1.2;
+  }
+
+  /* Larger forecast cards */
+  .forecast-card {
+    padding: 2rem 1.5rem;
+    min-height: 200px;
+  }
+
+  /* Bigger location permission modal */
+  .location-modal {
+    max-width: 600px;
+    padding: 3rem;
+  }
+
+  /* Enhanced text sizes */
+  .temperature-display {
+    font-size: 4rem;
+  }
+
+  .location-text {
+    font-size: 1.5rem;
+  }
+
+  .weather-description {
+    font-size: 1.25rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  /* Extra large screens */
+  .main-container {
+    padding: 3rem 6rem;
+  }
+
+  .weather-card-main {
+    padding: 4rem;
+  }
+
+  .digital-clock {
+    font-size: 6rem;
+  }
+
+  .temperature-display {
+    font-size: 5rem;
+  }
+}

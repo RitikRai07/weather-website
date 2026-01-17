@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Clock } from "lucide-react"
 import { motion } from "framer-motion"
+import { AnalogClock } from "@/components/analog-clock"
 
 interface EnhancedClockDisplayProps {
   showSeconds?: boolean
@@ -11,6 +12,7 @@ interface EnhancedClockDisplayProps {
 
 export function EnhancedClockDisplay({ showSeconds = true, compact = false }: EnhancedClockDisplayProps) {
   const [time, setTime] = useState<string>("")
+  const [date, setDate] = useState<string>("")
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -27,6 +29,15 @@ export function EnhancedClockDisplay({ showSeconds = true, compact = false }: En
       } else {
         setTime(`${hours}:${minutes}`)
       }
+
+      setDate(
+        now.toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+      )
     }
 
     updateTime()
@@ -40,7 +51,7 @@ export function EnhancedClockDisplay({ showSeconds = true, compact = false }: En
     return (
       <div className="flex items-center gap-2 text-sm font-mono">
         <Clock size={16} className="text-blue-500" />
-        <span className="text-gray-600 dark:text-gray-300">{time}</span>
+        <span className="text-gray-600 dark:text-gray-300">Analog Clock</span>
       </div>
     )
   }
@@ -49,21 +60,14 @@ export function EnhancedClockDisplay({ showSeconds = true, compact = false }: En
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-blue-200 dark:border-blue-800 rounded-lg p-4 backdrop-blur-sm"
+      className="bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-blue-600/10 border border-blue-200 dark:border-blue-800 rounded-2xl p-8 backdrop-blur-sm"
     >
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Current Time</span>
-        <Clock size={16} className="text-blue-500" />
+      <div className="flex items-center justify-between mb-6">
+        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+          Current Time
+        </span>
       </div>
-      <div className="text-4xl font-mono font-bold text-gray-900 dark:text-white tracking-wider">{time}</div>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-        {new Date().toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
-      </p>
+      <AnalogClock showDate={true} />
     </motion.div>
   )
 }
