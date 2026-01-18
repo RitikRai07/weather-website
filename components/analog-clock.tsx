@@ -76,25 +76,7 @@ export function AnalogClock({ showDate = true }: AnalogClockProps) {
           const y = -Math.cos(angle) * 85
 
           return (
-            <div
-              key={num}
-              className="absolute w-full h-full flex items-center justify-center"
-              style={{
-                transform: `rotate(${num === 12 ? 0 : num * 30}deg)`,
-              }}
-            >
-              <span
-                className="absolute font-bold text-2xl md:text-3xl text-white dark:text-gray-100"
-                style={{
-                  transform: `translateY(-130px) rotate(${num === 12 ? 0 : -num * 30}deg)`,
-                  textShadow: "0 2px 8px rgba(0, 0, 0, 0.7)",
-                  fontWeight: "700",
-                  letterSpacing: "2px",
-                }}
-              >
-                {num}
-              </span>
-            </div>
+            null
           )
         })}
 

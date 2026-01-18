@@ -57,17 +57,6 @@ export function EnhancedClockDisplay({ showSeconds = true, compact = false }: En
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-blue-600/10 border border-blue-200 dark:border-blue-800 rounded-2xl p-8 backdrop-blur-sm"
-    >
-      <div className="flex items-center justify-between mb-6">
-        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-          Current Time
-        </span>
-      </div>
-      <AnalogClock showDate={true} />
-    </motion.div>
+    null
   )
 }
